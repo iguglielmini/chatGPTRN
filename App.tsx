@@ -19,7 +19,7 @@ export default function App() {
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer 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", // trocar para sua key
+          "Bearer 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", // trocar para sua key
       },
       body: JSON.stringify({
         messages: [
@@ -35,6 +35,28 @@ export default function App() {
       .then((data) => {
         console.log("data", data.choices[0].message.content.trim());
         setoutputMessage(data.choices[0].message.content.trim());
+      });
+  };
+
+  const generateImages = () => {
+    console.log("generateImages", inputMessage);
+    fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization:
+          "Bearer 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", // trocar para sua key
+      },
+      body: JSON.stringify({
+        "prompt": inputMessage,
+        "n": 1,
+        "size": "256x256", 
+      }),
+    })
+      .then((responce) => responce.json())
+      .then((data) => {
+        console.log("data", data.data[0].url);
+        setoutputMessage(data.data[0].url);
       });
   };
 
@@ -56,7 +78,7 @@ export default function App() {
             onChangeText={handleTextInput}
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleButtonClick}>
+        <TouchableOpacity style={styles.button} onPress={generateImages}>
           <Text style={{ color: "white", textAlign: "center" }}>Enviar</Text>
         </TouchableOpacity>
       </View>
