@@ -14,22 +14,27 @@ export default function App() {
 
   const handleButtonClick = () => {
     console.log("Button Clicado", inputMessage);
-    fetch("https://api.openai.com/v1/completions", {
+    fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer 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", // trocar para sua key
+          "Bearer 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", // trocar para sua key
       },
       body: JSON.stringify({
-        prompt: inputMessage,
-        model: "text-davinci-003",
+        messages: [
+          {
+            role: "user",
+            content: inputMessage,
+          },
+        ],
+        model: "gpt-3.5-turbo",
       }),
     })
       .then((responce) => responce.json())
       .then((data) => {
-        console.log("data", data.choices[0].text);
-        setoutputMessage(data.choices[0].text.trim());
+        console.log("data", data.choices[0].message.content.trim());
+        setoutputMessage(data.choices[0].message.content.trim());
       });
   };
 
@@ -41,7 +46,7 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <Text>{outputMessage}</Text>
+        <Text style={styles.textOutput}>{outputMessage}</Text>
       </View>
       <View style={styles.content}>
         <View style={{ flex: 1 }}>
@@ -82,5 +87,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     borderColor: "#0343da",
     backgroundColor: "#0343da",
+  },
+  textOutput: {
+    textAlign: "left",
+    fontSize: 14,
+    fontWeight: "400",
+    lineHeight: 21,
+    paddingHorizontal: 24,
   },
 });
