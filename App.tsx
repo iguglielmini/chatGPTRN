@@ -7,19 +7,34 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import { GiftedChat, IMessage } from "react-native-gifted-chat";
 
 export default function App() {
+  const [messages, setMessages] = useState<IMessage[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [outputMessage, setoutputMessage] = useState(null);
+  const [outputMessage, setoutputMessage] = useState("");
 
   const handleButtonClick = () => {
     console.log("Button Clicado", inputMessage);
+
+    const message = {
+      _id: Math.random().toString(36).substring(7),
+      text: inputMessage,
+      createdAt: new Date(),
+      user: { _id: 1 },
+    };
+
+    setMessages((previousMessages) => {
+      return GiftedChat.append(previousMessages, [message]);
+    });
+
     fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer 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", // trocar para sua key
+          "Bearer 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", // trocar para sua key
       },
       body: JSON.stringify({
         messages: [
@@ -45,12 +60,12 @@ export default function App() {
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer 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", // trocar para sua key
+          "Bearer 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", // trocar para sua key
       },
       body: JSON.stringify({
-        "prompt": inputMessage,
-        "n": 1,
-        "size": "256x256", 
+        prompt: inputMessage,
+        n: 1,
+        size: "256x256",
       }),
     })
       .then((responce) => responce.json())
@@ -69,6 +84,11 @@ export default function App() {
     <View style={styles.container}>
       <View style={{ flex: 1, justifyContent: "center" }}>
         <Text style={styles.textOutput}>{outputMessage}</Text>
+        <GiftedChat
+          messages={messages}
+          renderInputToolbar={() => {}}
+          user={{ _id: 1 }}
+        />
       </View>
       <View style={styles.content}>
         <View style={{ flex: 1 }}>
@@ -78,8 +98,8 @@ export default function App() {
             onChangeText={handleTextInput}
           />
         </View>
-        <TouchableOpacity style={styles.button} onPress={generateImages}>
-          <Text style={{ color: "white", textAlign: "center" }}>Enviar</Text>
+        <TouchableOpacity style={styles.button} onPress={handleButtonClick}>
+          <MaterialIcons name="send" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
       <StatusBar style="auto" />
@@ -90,9 +110,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
   },
   input: {
     height: 50,
@@ -105,7 +122,9 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   button: {
-    padding: 16,
+    width: 70,
+    alignItems: "center",
+    justifyContent: "center",
     color: "#fff",
     borderColor: "#0343da",
     backgroundColor: "#0343da",
