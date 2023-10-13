@@ -1,14 +1,9 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import {
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  TouchableOpacity,
-} from "react-native";
+import { StyleSheet, View, TextInput, TouchableOpacity } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { GiftedChat, IMessage } from "react-native-gifted-chat";
+import * as Speech from "expo-speech";
 
 export default function App() {
   const [messages, setMessages] = useState<IMessage[]>([]);
@@ -16,6 +11,15 @@ export default function App() {
   const [outputMessage, setoutputMessage] = useState("");
 
   const handleButtonClick = () => {
+    console.log("Button Clicado", inputMessage);
+    if (inputMessage.toLocaleLowerCase().startsWith("foto")) {
+      generateImages();
+    } else {
+      generateText();
+    }
+  };
+
+  const generateText = () => {
     console.log("Button Clicado", inputMessage);
 
     const message = {
@@ -34,7 +38,7 @@ export default function App() {
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer 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", // trocar para sua key
+          "Bearer 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", // trocar para sua key
       },
       body: JSON.stringify({
         messages: [
@@ -49,29 +53,68 @@ export default function App() {
       .then((responce) => responce.json())
       .then((data) => {
         console.log("data", data.choices[0].message.content.trim());
+        setInputMessage("");
         setoutputMessage(data.choices[0].message.content.trim());
+        const message = {
+          _id: Math.random().toString(36).substring(7),
+          text: data.choices[0].message.content.trim(),
+          createdAt: new Date(),
+          user: { _id: 2, name: "Open IA" },
+        };
+
+        setMessages((previousMessages) => {
+          return GiftedChat.append(previousMessages, [message]);
+        });
+        const options = {};
+        Speech.speak(data.choices[0].message.content.trim(), options);
       });
   };
 
   const generateImages = () => {
     console.log("generateImages", inputMessage);
+
+    const message = {
+      _id: Math.random().toString(36).substring(7),
+      text: inputMessage,
+      createdAt: new Date(),
+      user: { _id: 1 },
+    };
+
+    setMessages((previousMessages) => {
+      return GiftedChat.append(previousMessages, [message]);
+    });
+
     fetch("https://api.openai.com/v1/images/generations", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization:
-          "Bearer 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", // trocar para sua key
+          "Bearer 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", // trocar para sua key
       },
       body: JSON.stringify({
         prompt: inputMessage,
-        n: 1,
-        size: "256x256",
+        n: 2,
+        size: "1024x1024",
       }),
     })
       .then((responce) => responce.json())
       .then((data) => {
         console.log("data", data.data[0].url);
+        setInputMessage("");
         setoutputMessage(data.data[0].url);
+        data.data.forEach((item: any) => {
+          const message = {
+            _id: Math.random().toString(36).substring(7),
+            text: "Image",
+            createdAt: new Date(),
+            user: { _id: 2, name: "Open IA" },
+            image: item.url,
+          };
+
+          setMessages((previousMessages) => {
+            return GiftedChat.append(previousMessages, [message]);
+          });
+        });
       });
   };
 
@@ -83,11 +126,12 @@ export default function App() {
   return (
     <View style={styles.container}>
       <View style={{ flex: 1, justifyContent: "center" }}>
-        <Text style={styles.textOutput}>{outputMessage}</Text>
+        {/* <Text style={styles.textOutput}>{outputMessage}</Text> */}
         <GiftedChat
           messages={messages}
           renderInputToolbar={() => {}}
-          user={{ _id: 1 }}
+          user={{ _id: 1, name: "Italo Giovanni" }}
+          minInputToolbarHeight={0}
         />
       </View>
       <View style={styles.content}>
@@ -95,6 +139,7 @@ export default function App() {
           <TextInput
             style={styles.input}
             placeholder="Pergunte me"
+            value={inputMessage}
             onChangeText={handleTextInput}
           />
         </View>
