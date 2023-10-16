@@ -1,0 +1,1 @@
+export {default as CustomInputToolbar} from './customInputToolbar.component';

@@ -1,19 +1,40 @@
 import React, { useState } from "react";
-
+import { GiftedChat, IMessage } from "react-native-gifted-chat";
 import * as S from "./styles";
 import { fetchChatIaApi } from "../../services/apiServiceChat";
 import { fetchImageIaApi } from "../../services/apiServiceImages";
+import { CustomInputToolbar } from "../../components";
 
 const ChatBot: React.FC = () => {
-  const [inputMessage, setInputMessage] = useState<string>("");
-  const [outputMessage, setoutputMessage] = useState<string>("");
+  const [messages, setMessages] = useState<IMessage[]>([]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [outputMessage, setoutputMessage] = useState("");
 
-  const handleButtonClick = (): void => {
-    fetchChatIaApi(inputMessage, setoutputMessage);
+  const handleButtonClick = () => {
+    if (inputMessage.toLocaleLowerCase().startsWith("foto")) {
+      generateImages();
+    } else {
+      generateText();
+    }
+    setInputMessage("");
+  };
+
+  const generateText = () => {
+    fetchChatIaApi(
+      inputMessage,
+      setMessages,
+      setInputMessage,
+      setoutputMessage
+    );
   };
 
   const generateImages = (): void => {
-    fetchImageIaApi(inputMessage, setoutputMessage);
+    fetchImageIaApi(
+      inputMessage,
+      setMessages,
+      setInputMessage,
+      setoutputMessage
+    );
   };
 
   const handleTextInput = (text: string) => {
@@ -23,20 +44,18 @@ const ChatBot: React.FC = () => {
 
   return (
     <S.Container>
-      <S.ContentChat>
-        <S.TextOutput>{outputMessage}</S.TextOutput>
-      </S.ContentChat>
-      <S.ContentInput>
-        <S.Box>
-          <S.Input
-            placeholder="Pergunte me..."
-            onChangeText={handleTextInput}
-          />
-        </S.Box>
-        <S.ButtonSend onPress={handleButtonClick}>
-          <S.ButtonText>Enviar</S.ButtonText>
-        </S.ButtonSend>
-      </S.ContentInput>
+        <GiftedChat
+          messages={messages}
+          user={{ _id: 1 }}
+          renderInputToolbar={() => (
+            <CustomInputToolbar
+              text={inputMessage}
+              onSend={handleButtonClick}
+              placeholder="Pergunte-me..."
+              onTextChange={handleTextInput}
+            />
+          )}
+        />
     </S.Container>
   );
 };
