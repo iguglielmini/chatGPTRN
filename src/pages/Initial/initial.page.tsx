@@ -9,8 +9,8 @@ const Initial: React.FC = () => {
     <S.Container>
       <S.Title>Initial Page</S.Title>
 
-      <S.ButtonSend onPress={() => {}}>
-        <S.ButtonText>Intial</S.ButtonText>
+      <S.ButtonSend onPress={() => navigate("Assimov")}>
+        <S.ButtonText>Asimov I.A</S.ButtonText>
       </S.ButtonSend>
 
       <S.ButtonSend onPress={() => navigate("Chatbot")}>

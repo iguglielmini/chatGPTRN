@@ -1,5 +1,5 @@
 const ChatGPTKey = {
-  apiKey: "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", // trocar
+  apiKey: "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", // trocar
 };
 
 export { ChatGPTKey };

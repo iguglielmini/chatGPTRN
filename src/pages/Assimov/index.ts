@@ -1,0 +1,1 @@
+export {default as Assimov} from './assimov.page';
